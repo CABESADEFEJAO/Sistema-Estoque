@@ -1,6 +1,9 @@
 import os
 import pandas as pd
 import random
+import pytz
+
+from datetime import datetime
 from faker import Faker
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
@@ -42,20 +45,49 @@ def generate_data(n_rows=100):
     """
     print(f"Gerando {n_rows} linhas de dados no Pandas...")
     fake = Faker('pt_BR')
-    
-    # Listas auxiliares para dar realismo
-    categorias = ['Periféricos', 'Hardware', 'Monitores', 'Cadeiras', 'Notebooks']
-    marcas = ['Logitech', 'Dell', 'Redragon', 'Corsair', 'Kingston', 'Samsung']
-    produtos_base = ['Mouse', 'Teclado', 'Headset', 'Monitor', 'SSD', 'Memória RAM', 'Gabinete']
+
+    fuso_brasil = pytz.timezone('America/Sao_Paulo')
+
+    categorias = [
+        'Periféricos',
+        'Hardware',
+        'Monitores',
+        'Cadeiras',
+        'Notebooks'
+    ]
+
+    marcas = [
+        'Logitech',
+        'Dell',
+        'Redragon',
+        'Corsair',
+        'Kingston',
+        'Samsung'
+        ]
+
+    produtos_base = [
+        'Mouse',
+        'Teclado',
+        'Headset',
+        'Monitor',
+        'SSD',
+        'Memória RAM',
+        'Gabinete'
+        ]
 
     data = []
     for _ in range(n_rows):
         produto_nome = f"{random.choice(produtos_base)} {fake.word().capitalize()} {random.choice(marcas)}"
-        
+
+        hora = datetime.now(fuso_brasil)
+
+        hora_cadastro = hora.replace(tzinfo=None)
+
         row = {
             'nome': produto_nome,
             'quantidade': random.randint(0, 200),
-            'categoria': random.choice(categorias)
+            'categoria': random.choice(categorias),
+            'data_cadastro': hora_cadastro
         }
         data.append(row)
 
@@ -69,17 +101,17 @@ def load_to_postgres(df, engine):
     Carrega o DataFrame para o Banco de Dados.
     """
     print("Carregando dados para o PostgreSQL...")
-    
+
     df.to_sql('produtos', con=engine, if_exists='append', index=False)
-    
-    print(f"🚀 Sucesso! {len(df)} registros inseridos.")
+
+    print(f"Sucesso! {len(df)} registros inseridos.")
 
 
 if __name__ == "__main__":
     try:
 
         engine = create_engine(CONN_STRING)
-        
+
         init_db(engine)
 
         df_produtos = generate_data(n_rows=50)
