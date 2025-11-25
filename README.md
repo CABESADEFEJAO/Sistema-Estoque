@@ -60,26 +60,46 @@ app.use(cors());
 
 3. 🗄️ Banco de Dados (PostgreSQL)
 
+O banco de dados foi containerizado para garantir a reprodutibilidade do ambiente e conta com um pipeline de dados automatizado.
+
 O banco pode rodar em:
+* **Docker (Recomendado para este projeto)**
+* Serviços cloud (Railway, Render, Neon, Supabase)
+* Máquina local ou Servidor remoto
 
-Sua máquina local
+Em vez de criar tabelas manualmente, o projeto utiliza um script Python (`database_pipeline/main.py`) que atua como **Infrastructure as Code (IaC)**.
 
-Docker
+**Funcionalidades do Pipeline:**
+1.  **DDL Automatizado:** Recria a tabela `produtos` do zero (Idempotência).
+2.  **Data Seeding:** Gera 100 registros realistas utilizando a lib `Faker`.
+3.  **Data Quality:** Ajusta os timestamps para o fuso horário brasileiro (America/Sao_Paulo) antes da ingestão.
 
-Serviços cloud (Railway, Render, Neon, Supabase, etc.)
+### 🚀 Como subir o Módulo de Dados
+**1. Iniciar o Banco (Docker):**
 
-Servidor remoto na rede
+```
+docker run --name postgres-estoque -e POSTGRES_PASSWORD=root -e POSTGRES_DB=estoque -p 5432:5432 -d postgres
+```
+### 2. Executar Carga de Dados (Python):
 
-Script da tabela utilizada:
+```
+cd database_pipeline
+pip install -r requirements.txt
+python main.py
+```
+### 📄 Schema da Tabela (Referência)
+Caso queira consultar a estrutura criada pelo script Python:
+```
+SQL
+
 CREATE TABLE produtos (
   id SERIAL PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
-  quantidade INTEGER NOT NULL
+  quantidade INTEGER NOT NULL,
+  categoria VARCHAR(50),
+  data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-✔️ O backend acessa o banco via rede
-
-Assim, banco também fica totalmente separado dos outros serviços.
+```
 
 4. 🔗 Como Tudo se Conecta
 4.1 Frontend → Backend
