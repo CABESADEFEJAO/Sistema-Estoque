@@ -2,7 +2,6 @@ import os
 import pandas as pd
 import random
 import pytz
-
 from datetime import datetime
 from faker import Faker
 from dotenv import load_dotenv
@@ -15,112 +14,121 @@ DB_PASS = os.getenv("DB_PASS", "root")
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_NAME = os.getenv("DB_NAME", "estoque")
 DB_PORT = os.getenv("DB_PORT", "5432")
-
-
 CONN_STRING = f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
+TABELAS = [
+    "usuarios",
+    "produtos"
+]
 
-def init_db(engine):
+DROP_QUERY = "DROP TABLE IF EXISTS {tabela_nome};"
 
-    print("Resetando a tabela 'produtos'")
+DDL_QUERIES = {
+    "produtos": """
+        CREATE TABLE produtos (
+            id SERIAL PRIMARY KEY,
+            nome VARCHAR(100) NOT NULL,
+            quantidade INTEGER NOT NULL,
+            data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+    """,
+    "usuarios": """
+        CREATE TABLE usuarios (
+            id SERIAL PRIMARY KEY,
+            nome VARCHAR(100) NOT NULL,
+            senha VARCHAR(100) NOT NULL
+        );
+    """
+}
+
+
+def get_engine():
+    return create_engine(CONN_STRING)
+
+
+def preparar_banco(engine, tabela: str):
+    print(f"🔨 [DDL] Preparando tabela: {tabela}")
     with engine.connect() as conn:
-        # Começa uma transação
-        conn.execute(text("DROP TABLE IF EXISTS produtos;"))
-        conn.execute(text("""
-            CREATE TABLE produtos (
-                id SERIAL PRIMARY KEY,
-                nome VARCHAR(100) NOT NULL,
-                quantidade INTEGER NOT NULL,
-                categoria VARCHAR(50),
-                data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        """))
+        conn.execute(text(DROP_QUERY.format(tabela_nome=tabela)))
+        conn.execute(text(DDL_QUERIES[tabela]))
         conn.commit()
-    print("Schema criado com sucesso.")
 
 
-def generate_data(n_rows=100):
-    """
-    Gera dados falsos e retorna um DataFrame do Pandas.
-    """
-    print(f"Gerando {n_rows} linhas de dados no Pandas...")
+def gerar_dataframe(tabela: str, n_rows=50) -> pd.DataFrame:
     fake = Faker('pt_BR')
-
     fuso_brasil = pytz.timezone('America/Sao_Paulo')
-
-    categorias = [
-        'Periféricos',
-        'Hardware',
-        'Monitores',
-        'Cadeiras',
-        'Notebooks'
-    ]
-
-    marcas = [
-        'Logitech',
-        'Dell',
-        'Redragon',
-        'Corsair',
-        'Kingston',
-        'Samsung'
-        ]
-
-    produtos_base = [
-        'Mouse',
-        'Teclado',
-        'Headset',
-        'Monitor',
-        'SSD',
-        'Memória RAM',
-        'Gabinete'
-        ]
-
     data = []
-    for _ in range(n_rows):
-        produto_nome = f"{random.choice(produtos_base)} {fake.word().capitalize()} {random.choice(marcas)}"
 
-        hora = datetime.now(fuso_brasil)
+    if tabela == "produtos":
+        print(f"[Generate] Gerando {n_rows} produtos fictícios...")
+        marcas = [
+            'Logitech',
+            'Dell',
+            'Redragon',
+            'Corsair',
+            'Kingston',
+            'Samsung'
+            ]
 
-        hora_cadastro = hora.replace(tzinfo=None)
+        produtos_base = [
+            'Mouse',
+            'Teclado',
+            'Headset',
+            'Monitor',
+            'SSD',
+            'Memória RAM'
+            ]
 
-        row = {
-            'nome': produto_nome,
-            'quantidade': random.randint(0, 200),
-            'categoria': random.choice(categorias),
-            'data_cadastro': hora_cadastro
-        }
-        data.append(row)
-
-    # Cria o DataFrame
-    df = pd.DataFrame(data)
-    return df
+        for _ in range(n_rows):
+            produto_nome = f"{random.choice(produtos_base)} {fake.word().capitalize()} {random.choice(marcas)}"
+            hora = datetime.now(fuso_brasil).replace(tzinfo=None)
+            row = {
+                'nome': produto_nome,
+                'quantidade': random.randint(1, 200),
+                'data_cadastro': hora
+            }
+            data.append(row)
 
 
-def load_to_postgres(df, engine):
-    """
-    Carrega o DataFrame para o Banco de Dados.
-    """
-    print("Carregando dados para o PostgreSQL...")
+    elif tabela == "usuarios":
+        print(f"[Generate] Tabela 'usuarios' criada.")
+        return pd.DataFrame()
 
-    df.to_sql('produtos', con=engine, if_exists='append', index=False)
+    return pd.DataFrame(data)
 
-    print(f"Sucesso! {len(df)} registros inseridos.")
+
+def carregar_dados(engine, tabela: str, df: pd.DataFrame):
+
+    if df.empty:
+        print(f"[Load] Tabela '{tabela}' está vazia. Nenhuma carga realizada.")
+        return
+
+    print(f"[Load] Inserindo {len(df)} linhas em '{tabela}'...")
+    df.to_sql(
+        name=tabela,
+        con=engine,
+        if_exists='append',
+        index=False
+    )
+
+
+def run_pipeline():
+    try:
+        engine = get_engine()
+        for tabela in TABELAS:
+            print(f"\n--- Processando: {tabela.upper()} ---")
+
+            preparar_banco(engine, tabela)
+
+            df = gerar_dataframe(tabela, n_rows=50)
+
+            carregar_dados(engine, tabela, df)
+
+        print("\nPipeline finalizado com sucesso!")
+
+    except Exception as e:
+        print(f"Erro fatal no pipeline: {e}")
 
 
 if __name__ == "__main__":
-    try:
-
-        engine = create_engine(CONN_STRING)
-
-        init_db(engine)
-
-        df_produtos = generate_data(n_rows=50)
-
-        print("\n--- Preview dos Dados (Top 5) ---")
-        print(df_produtos.head())
-        print("---------------------------------\n")
-
-        load_to_postgres(df_produtos, engine)
-
-    except Exception as e:
-        print(f"Deu erro: {e}")
+    run_pipeline()
