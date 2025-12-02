@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <title>Teste CRUD Estoque (OOP JS)</title>
+  <style>
+    body{font-family: Arial;padding:20px}
+    input,button{margin:5px}
+    pre{background:#eee;padding:10px}
+  </style>
+</head>
+<body>
+  <h2>Produtos (OOP JS)</h2>
+  <button onclick="listar()">Listar Produtos</button>
+  <pre id="saida"></pre>
+
+  <h3>Criar Produto</h3>
+  <input id="nome" placeholder="Nome">
+  <input id="quantidade" placeholder="Quantidade" type="number">
+  <button onclick="criar()">Criar</button>
+
+  <h3>Atualizar Produto</h3>
+  <input id="idUpdate" placeholder="ID">
+  <input id="nomeUpdate" placeholder="Novo Nome">
+  <input id="quantUpdate" placeholder="Nova Quantidade" type="number">
+  <button onclick="atualizar()">Atualizar</button>
+
+  <h3>Excluir Produto</h3>
+  <input id="idDelete" placeholder="ID">
+  <button onclick="excluir()">Excluir</button>
+
+<script>
+const API = "http://localhost:3000/produtos";
+
+function listar() {
+  fetch(API)
+    .then(res => res.json())
+    .then(data => document.getElementById("saida").textContent = JSON.stringify(data, null, 2))
+    .catch(e => console.error(e));
+}
+
+function criar() {
+  const body = { nome: document.getElementById("nome").value, quantidade: Number(document.getElementById("quantidade").value) };
+  fetch(API, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) })
+    .then(res => res.json()).then(listar);
+}
+
+function atualizar() {
+  const id = document.getElementById("idUpdate").value;
+  const body = { nome: document.getElementById("nomeUpdate").value, quantidade: Number(document.getElementById("quantUpdate").value) };
+  fetch(`${API}/${id}`, { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) })
+    .then(res => res.json()).then(listar);
+}
+
+function excluir() {
+  const id = document.getElementById("idDelete").value;
+  fetch(`${API}/${id}`, { method: "DELETE" }).then(res => res.json()).then(listar);
+}
+</script>
+</body>
+</html>
