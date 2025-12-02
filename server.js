@@ -1,21 +1,10 @@
 const express = require('express');
 const cors = require('cors');
-<<<<<<< HEAD
-const produtoRoutes = require('./routes/produtoRoutes');
-
-=======
 const db = require('./db');
->>>>>>> origin/main
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-<<<<<<< HEAD
-app.use('/produtos', produtoRoutes);
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`API OOP JS rodando na porta ${PORT}`));
-=======
 app.get('/produtos', async (req,res)=>{
   const {rows}= await db.query('SELECT * FROM produtos ORDER BY id');
   res.json(rows);
@@ -49,4 +38,3 @@ app.delete('/produtos/:id', async (req,res)=>{
 });
 
 app.listen(3000,()=>console.log('API rodando na 3000'));
->>>>>>> origin/main
