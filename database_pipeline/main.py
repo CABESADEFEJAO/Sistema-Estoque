@@ -47,7 +47,7 @@ def get_engine():
 
 
 def preparar_banco(engine, tabela: str):
-    print(f"🔨 [DDL] Preparando tabela: {tabela}")
+    print(f"[DDL] Preparando tabela: {tabela}")
     with engine.connect() as conn:
         conn.execute(text(DROP_QUERY.format(tabela_nome=tabela)))
         conn.execute(text(DDL_QUERIES[tabela]))
@@ -88,7 +88,6 @@ def gerar_dataframe(tabela: str, n_rows=50) -> pd.DataFrame:
                 'data_cadastro': hora
             }
             data.append(row)
-
 
     elif tabela == "usuarios":
         print(f"[Generate] Tabela 'usuarios' criada.")
