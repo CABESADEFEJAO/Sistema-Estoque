@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Cadastro de Usuário - Sistema de Estoque</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    input, button { margin: 5px 0; display: block; }
+    .erro { color: red; }
+    .sucesso { color: green; }
+    a { display: inline-block; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+  <h2>Cadastro de Usuário</h2>
+
+  <label>Nome</label>
+  <input type="text" id="nome" placeholder="Digite um nome de usuário">
+
+  <label>Senha</label>
+  <input type="password" id="senha" placeholder="Digite uma senha">
+
+  <label>Confirmar Senha</label>
+  <input type="password" id="confirmarSenha" placeholder="Repita a senha">
+
+  <button onclick="cadastrar()">Cadastrar</button>
+
+  <p id="msg" class=""></p>
+
+  <a href="login.html">Já tem conta? Fazer login</a>
+
+<script>
+  const API = 'http://localhost:3000';
+
+  async function cadastrar() {
+    const nome = document.getElementById('nome').value.trim();
+    const senha = document.getElementById('senha').value;
+    const confirmarSenha = document.getElementById('confirmarSenha').value;
+    const msg = document.getElementById('msg');
+
+    msg.textContent = '';
+    msg.className = '';
+
+    if (!nome || !senha || !confirmarSenha) {
+      msg.textContent = 'Preencha todos os campos.';
+      msg.className = 'erro';
+      return;
+    }
+
+    if (senha !== confirmarSenha) {
+      msg.textContent = 'As senhas não conferem.';
+      msg.className = 'erro';
+      return;
+    }
+
+    try {
+      const resp = await fetch(`${API}/usuarios`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, senha })
+      });
+
+      const data = await resp.json();
+
+      if (!resp.ok) {
+        msg.textContent = data.error || 'Erro ao cadastrar usuário.';
+        msg.className = 'erro';
+        return;
+      }
+
+      msg.textContent = 'Usuário cadastrado com sucesso! Você já pode fazer login.';
+      msg.className = 'sucesso';
+
+      // opcional: redirecionar pro login depois de alguns segundos
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 1500);
+
+    } catch (err) {
+      console.error(err);
+      msg.textContent = 'Erro ao conectar com o servidor.';
+      msg.className = 'erro';
+    }
+  }
+</script>
+
+</body>
+</html>

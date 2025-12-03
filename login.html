@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Sistema de Estoque</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    input, button { margin: 5px; display: block; }
+    .erro { color: red; }
+    a { display: inline-block; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+  <h2>Login</h2>
+
+  <label>Nome</label>
+  <input type="text" id="nome" placeholder="Digite seu nome">
+
+  <label>Senha</label>
+  <input type="password" id="senha" placeholder="Digite sua senha">
+
+  <button onclick="fazerLogin()">Entrar</button>
+
+  <p id="msg" class="erro"></p>
+
+  <!-- Novo: link para cadastro -->
+  <a href="cadastro.html">Não tem conta? Cadastre-se</a>
+
+<script>
+  const API = 'http://localhost:3000';
+
+  async function fazerLogin() {
+    const nome = document.getElementById('nome').value;
+    const senha = document.getElementById('senha').value;
+    const msg = document.getElementById('msg');
+    msg.textContent = '';
+
+    try {
+      const resp = await fetch(`${API}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, senha })
+      });
+
+      if (!resp.ok) {
+        msg.textContent = 'Nome ou senha inválidos.';
+        return;
+      }
+
+      localStorage.setItem('usuarioLogado', 'true');
+      window.location.href = 'index.html';
+    } catch (err) {
+      console.error(err);
+      msg.textContent = 'Erro ao conectar com o servidor.';
+    }
+  }
+</script>
+
+</body>
+</html>
