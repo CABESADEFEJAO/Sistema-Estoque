@@ -1,0 +1,175 @@
+/* ===== GLOBAL ===== */
+body {
+  background: #0e0e0f;
+  color: #e4e4e4;
+  font-family: "Arial", sans-serif;
+  margin: 0;
+  padding: 20px;
+}
+
+/* ===== TITULOS ===== */
+h1 {
+  color: #15ff75;
+  text-shadow: 0 0 10px #15ff75;
+}
+
+h2 {
+  color: #cfcfcf;
+  margin-top: 30px;
+}
+
+/* ===== PRODUTOS (LISTA) ===== */
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  background: #171717;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  border: 1px solid #222;
+  transition: 0.2s;
+}
+
+li:hover {
+  border-color: #15ff75;
+  box-shadow: 0 0 10px #15ff75;
+}
+
+/* ===== INPUTS ===== */
+input {
+  background: #1b1b1d;
+  color: #ffffff;
+  border: 1px solid #333;
+  padding: 8px 10px;
+  margin-right: 10px;
+  border-radius: 6px;
+  transition: 0.2s;
+}
+
+input:focus {
+  outline: none;
+  border-color: #15ff75;
+  box-shadow: 0 0 8px #15ff75;
+}
+
+/* Inputs no modo edição */
+.left input {
+  width: 250px;
+}
+
+/* Input específico da quantidade no modo edição */
+.qty-input {
+  width: 80px;
+  text-align: right;
+}
+
+/* ===== BOTÕES ===== */
+button {
+  background: #15ff75;
+  border: none;
+  padding: 8px 16px;
+  font-weight: bold;
+  border-radius: 6px;
+  color: #000;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 12px #15ff75;
+}
+
+button.delete {
+  background: #ff3b3b;
+  color: white;
+}
+
+button.delete:hover {
+  box-shadow: 0 0 12px #ff3b3b;
+}
+
+/* ===== MENSAGENS ===== */
+p {
+  margin: 5px 0;
+}
+p.error {
+  color: #ff5a5a;
+}
+p.success {
+  color: #15ff75;
+  text-shadow: 0 0 6px #15ff75;
+}
+
+/* ===== ESTRUTURA DA LINHA DO PRODUTO ===== */
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* ===== LADO ESQUERDO ===== */
+.left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Nome */
+.prod-name {
+  font-weight: bold;
+  color: #eaeaea;
+  width: 420px;
+}
+
+/* ===== LADO DIREITO (BOTÕES) ===== */
+.right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Quantidade */
+.prod-qty {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  min-width: 140px;
+  padding: 6px 12px;
+
+  color: #15ff75;
+  font-weight: bold;
+}
+
+.qty-num {
+  width: 50px;
+  text-align: right;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #15ff75;
+}
+
+.qty-label {
+  font-size: 0.85rem;
+  color: #e4e4e4;
+  opacity: 0.9;
+}
+
+.product-item .row {
+  width: 100%;
+}
+
+.search-bar {
+  width: 27%;
+}
